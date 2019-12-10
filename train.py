@@ -77,23 +77,11 @@ def get_unet():
     return model
 
 
-def preprocess(imgs):
-    imgs_p = np.ndarray((imgs.shape[0], img_rows, img_cols), dtype=np.uint8)
-    for i in range(imgs.shape[0]):
-        imgs_p[i] = resize(imgs[i], (img_cols, img_rows), preserve_range=True)
-
-    imgs_p = imgs_p[..., np.newaxis]
-    return imgs_p
-
-
 def train_and_predict():
     print('-'*30)
     print('Loading and preprocessing train data...')
     print('-'*30)
     imgs_train, imgs_mask_train = load_train_data()
-
-    imgs_train = preprocess(imgs_train)
-    imgs_mask_train = preprocess(imgs_mask_train)
 
     imgs_train = imgs_train.astype('float32')
     mean = np.mean(imgs_train)  # mean for data centering

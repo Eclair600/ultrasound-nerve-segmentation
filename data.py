@@ -5,51 +5,59 @@ import numpy as np
 
 from skimage.io import imsave, imread
 
+import matplotlib.pyplot as plt
+from skimage.transform import resize # from scipy.misc import imresize
+import nibabel
+from tqdm import tqdm
+
 data_path = 'raw/'
+image_rows = 256
+image_cols = 256
 
-image_rows = 420
-image_cols = 580
+def read_train_exam(exam_nb):
+    image = nibabel.load('./chaos/train/%02d-T2SPIR-src.nii.gz'%(exam_nb))
+    mask = nibabel.load('./chaos/train/%02d-T2SPIR-mask.nii.gz'%(exam_nb))
+    return image, mask
 
+def read_test_exam(exam_nb):
+    image = nibabel.load('./chaos/test/%02d-T2SPIR-src.nii.gz'%(exam_nb))
+    return image
 
-def create_train_data():
-    train_data_path = os.path.join(data_path, 'train')
-    images = os.listdir(train_data_path)
-    total = len(images) / 2
+#Resize each slice to 256x256
+#preserve_range to get the same range of intensity
+def preprocess(image):
+    image_ = np.ndarray((img_rows,img_cols,image.shape[2]))
+    for i in range(image.shape[2]):
+        image_[:,:,i] = resize(image.get_data()[:,:,i],(img_rows,img_cols),
+                               mode='reflect',
+                               preserve_range=True,
+                               anti_aliasing=True)
+    return image_
 
-    imgs = np.ndarray((total, image_rows, image_cols), dtype=np.uint8)
-    imgs_mask = np.ndarray((total, image_rows, image_cols), dtype=np.uint8)
-
-    i = 0
+def create_train_data(train_ids = [1,2,3,5,8,10,13,19]):
     print('-'*30)
     print('Creating training images...')
     print('-'*30)
-    for image_name in images:
-        if 'mask' in image_name:
-            continue
-        image_mask_name = image_name.split('.')[0] + '_mask.tif'
-        img = imread(os.path.join(train_data_path, image_name), as_grey=True)
-        img_mask = imread(os.path.join(train_data_path, image_mask_name), as_grey=True)
-
-        img = np.array([img])
-        img_mask = np.array([img_mask])
-
-        imgs[i] = img
-        imgs_mask[i] = img_mask
-
-        if i % 100 == 0:
-            print('Done: {0}/{1} images'.format(i, total))
-        i += 1
-    print('Loading done.')
-
-    np.save('imgs_train.npy', imgs)
-    np.save('imgs_mask_train.npy', imgs_mask)
-    print('Saving to .npy files done.')
+    for idx, train_id in tqdm(enumerate(train_ids)):
+        image, mask = read_train_exam(train_id)     
+        image = preprocess(image)
+        mask = preprocess(mask)        
+        if idx > 0:
+            train_data = np.concatenate((train_data, image),axis=-1)
+            train_mask = np.concatenate((train_mask, mask),axis=-1)
+        else:
+            train_data = image
+            train_mask = mask   
+    np.savez_compressed('imgs_train', imgs=train_data,)
+    np.savez_compressed('imgs_mask_train', imgs_mask=train_mask)
+    print("Training images saved {},{}".format(train_data.shape,train_mask.shape)) 
 
 
 def load_train_data():
-    imgs_train = np.load('imgs_train.npy')
-    imgs_mask_train = np.load('imgs_mask_train.npy')
-    return imgs_train, imgs_mask_train
+    imgs = np.load('imgs_train.npz')['imgs']
+i   mgs_mask = np.load('imgs_mask_train.npz')['imgs_mask']
+
+    return imgs, imgs_mask
 
 
 def create_test_data():
