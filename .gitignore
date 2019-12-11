@@ -2,5 +2,4 @@
 *.npy
 *.csv
 *.hdf5
-*.npz
 
