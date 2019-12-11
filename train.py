@@ -4,18 +4,19 @@ import os
 from skimage.transform import resize
 from skimage.io import imsave
 import numpy as np
-from keras.models import Model
-from keras.layers import Input, concatenate, Conv2D, MaxPooling2D, Conv2DTranspose
-from keras.optimizers import Adam
-from keras.callbacks import ModelCheckpoint
-from keras import backend as K
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Input, concatenate, Conv2D, MaxPooling2D, Conv2DTranspose
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.callbacks import ModelCheckpoint
+from tensorflow.keras import backend as K
+
 
 from data import load_train_data, load_test_data
 
 K.set_image_data_format('channels_last')  # TF dimension ordering in this code
 
-img_rows = 96
-img_cols = 96
+img_rows = 256
+img_cols = 256
 
 smooth = 1.
 
@@ -68,7 +69,7 @@ def get_unet():
     conv9 = Conv2D(32, (3, 3), activation='relu', padding='same')(up9)
     conv9 = Conv2D(32, (3, 3), activation='relu', padding='same')(conv9)
 
-    conv10 = Conv2D(1, (1, 1), activation='sigmoid')(conv9)
+    conv10 = Conv2D(4,(1, 1), activation='sigmoid')(conv9)
 
     model = Model(inputs=[inputs], outputs=[conv10])
 
@@ -86,12 +87,12 @@ def train_and_predict():
     imgs_train = imgs_train.astype('float32')
     mean = np.mean(imgs_train)  # mean for data centering
     std = np.std(imgs_train)  # std for data normalization
-
     imgs_train -= mean
     imgs_train /= std
 
-    imgs_mask_train = imgs_mask_train.astype('float32')
-    imgs_mask_train /= 255.  # scale masks to [0, 1]
+    #We have 4 classes, it must be have 4 levels
+    #imgs_mask_train = imgs_mask_train.astype('float32')
+    #imgs_mask_train /= 255.  # scale masks to [0, 1]
 
     print('-'*30)
     print('Creating and compiling model...')
@@ -102,40 +103,40 @@ def train_and_predict():
     print('-'*30)
     print('Fitting model...')
     print('-'*30)
-    model.fit(imgs_train, imgs_mask_train, batch_size=32, nb_epoch=20, verbose=1, shuffle=True,
+    model.fit(imgs_train, imgs_mask_train, batch_size=32, nb_epoch=5, verbose=1, shuffle=True,
               validation_split=0.2,
               callbacks=[model_checkpoint])
 
-    print('-'*30)
-    print('Loading and preprocessing test data...')
-    print('-'*30)
-    imgs_test, imgs_id_test = load_test_data()
-    imgs_test = preprocess(imgs_test)
+    # print('-'*30)
+    # print('Loading and preprocessing test data...')
+    # print('-'*30)
+    # imgs_test, imgs_id_test = load_test_data()
+    # imgs_test = preprocess(imgs_test)
 
-    imgs_test = imgs_test.astype('float32')
-    imgs_test -= mean
-    imgs_test /= std
+    # imgs_test = imgs_test.astype('float32')
+    # imgs_test -= mean
+    # imgs_test /= std
 
-    print('-'*30)
-    print('Loading saved weights...')
-    print('-'*30)
-    model.load_weights('weights.h5')
+    # print('-'*30)
+    # print('Loading saved weights...')
+    # print('-'*30)
+    # model.load_weights('weights.h5')
 
-    print('-'*30)
-    print('Predicting masks on test data...')
-    print('-'*30)
-    imgs_mask_test = model.predict(imgs_test, verbose=1)
-    np.save('imgs_mask_test.npy', imgs_mask_test)
+    # print('-'*30)
+    # print('Predicting masks on test data...')
+    # print('-'*30)
+    # imgs_mask_test = model.predict(imgs_test, verbose=1)
+    # np.save('imgs_mask_test.npy', imgs_mask_test)
 
-    print('-' * 30)
-    print('Saving predicted masks to files...')
-    print('-' * 30)
-    pred_dir = 'preds'
-    if not os.path.exists(pred_dir):
-        os.mkdir(pred_dir)
-    for image, image_id in zip(imgs_mask_test, imgs_id_test):
-        image = (image[:, :, 0] * 255.).astype(np.uint8)
-        imsave(os.path.join(pred_dir, str(image_id) + '_pred.png'), image)
+    # print('-' * 30)
+    # print('Saving predicted masks to files...')
+    # print('-' * 30)
+    # pred_dir = 'preds'
+    # if not os.path.exists(pred_dir):
+    #     os.mkdir(pred_dir)
+    # for image, image_id in zip(imgs_mask_test, imgs_id_test):
+    #     image = (image[:, :, 0] * 255.).astype(np.uint8)
+    #     imsave(os.path.join(pred_dir, str(image_id) + '_pred.png'), image)
 
 if __name__ == '__main__':
     train_and_predict()
