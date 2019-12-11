@@ -38,7 +38,7 @@ def create_train_data(train_ids = [1,2,3,5,8,10,13,19]):
     print('-'*30)
     print('Creating training images...')
     print('-'*30)
-     for idx, train_id in tqdm(enumerate(train_ids)):
+    for idx, train_id in tqdm(enumerate(train_ids)):
         image, mask = read_train_exam(train_id)     
         image = preprocess(image)
         mask = preprocess(mask)        
