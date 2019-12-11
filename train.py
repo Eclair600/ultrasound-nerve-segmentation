@@ -29,14 +29,20 @@ img_cols = 256
 smooth = 1.
 
 
-def dice_coef(y_true, y_pred):
+def dice_coef_(y_true, y_pred):
     y_true_f = K.flatten(y_true)
     y_pred_f = K.flatten(y_pred)
     intersection = K.sum(y_true_f * y_pred_f)
     return (2. * intersection + smooth) / (K.sum(y_true_f) + K.sum(y_pred_f) + smooth)
+def dice_coef(y_true, y_pred):
+    dice_liver = dice_coef_(y_true[0,:,:,0],y_pred[0,:,:,0])
+    dice_rkidney = dice_coef_(y_true[0,:,:,1], y_pred[0,:,:,1])
+    dice_lkidney = dice_coef_(y_true[0,:,:,2], y_pred[0,:,:,2])
+    dice_spleen = dice_coef_(y_true[0,:,:,3], y_pred[0,:,:,3])
+    return dice_liver + 100*(dice_rkidney+dice_lkidney+dice_spleen)
+    
 
-
-def dice_coef_loss(y_true, y_pred):
+def dice_coef_loss(y_true, y_pred):  
     return -dice_coef(y_true, y_pred)
 
 
@@ -126,7 +132,7 @@ def test():
     imgs_train = imgs_train.astype('float32')
     mean = np.mean(imgs_train)  # mean for data centering
     std = np.std(imgs_train)  # std for data normalization
-    
+
     imgs_test = load_test_data()
 
     imgs_test = imgs_test.astype('float32')
