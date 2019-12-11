@@ -54,8 +54,8 @@ def create_train_data(train_ids = [1,2,3,5,8,10,13,19]):
 
 def load_train_data():
     #path data_train
-    imgs = np.load('../imgs_train.npz')['imgs']
-    imgs_mask = np.load('../imgs_mask_train.npz')['imgs_mask']
+    imgs = np.load('imgs_train.npz')['imgs']
+    imgs_mask = np.load('imgs_mask_train.npz')['imgs_mask']
 
     return imgs, imgs_mask
 

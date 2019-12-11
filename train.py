@@ -4,11 +4,19 @@ import os
 from skimage.transform import resize
 from skimage.io import imsave
 import numpy as np
+""" #version tf2
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, concatenate, Conv2D, MaxPooling2D, Conv2DTranspose
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import ModelCheckpoint
 from tensorflow.keras import backend as K
+"""
+#version tf1
+from keras.models import Model
+from keras.layers import Input, concatenate, Conv2D, MaxPooling2D, Conv2DTranspose
+from keras.optimizers import Adam
+from keras.callbacks import ModelCheckpoint
+from keras import backend as K
 
 
 from data import load_train_data, load_test_data
@@ -103,7 +111,7 @@ def train_and_predict():
     print('-'*30)
     print('Fitting model...')
     print('-'*30)
-    model.fit(imgs_train, imgs_mask_train, batch_size=32, nb_epoch=5, verbose=1, shuffle=True,
+    model.fit(imgs_train, imgs_mask_train, batch_size=32, epochs=50, verbose=1, shuffle=True,
               validation_split=0.2,
               callbacks=[model_checkpoint])
 
