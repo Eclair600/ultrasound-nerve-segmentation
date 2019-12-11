@@ -115,29 +115,38 @@ def train_and_predict():
               validation_split=0.2,
               callbacks=[model_checkpoint])
 
-    # print('-'*30)
-    # print('Loading and preprocessing test data...')
-    # print('-'*30)
-    # imgs_test, imgs_id_test = load_test_data()
-    # imgs_test = preprocess(imgs_test)
+    
+def test():
+    print('-'*30)
+    print('Loading and preprocessing test data...')
+    print('-'*30)
 
-    # imgs_test = imgs_test.astype('float32')
-    # imgs_test -= mean
-    # imgs_test /= std
+    imgs_train, imgs_mask_train = load_train_data()
 
-    # print('-'*30)
+    imgs_train = imgs_train.astype('float32')
+    mean = np.mean(imgs_train)  # mean for data centering
+    std = np.std(imgs_train)  # std for data normalization
+    
+    imgs_test = load_test_data()
+
+    imgs_test = imgs_test.astype('float32')
+    imgs_test -= mean
+    imgs_test /= std
+
+    print('-'*30)
+    print('Creating and compiling model...')
+    print('-'*30)
+    model = get_unet()
     # print('Loading saved weights...')
     # print('-'*30)
-    # model.load_weights('weights.h5')
+    model.load_weights('weights.h5')
 
     # print('-'*30)
-    # print('Predicting masks on test data...')
+    print('Predicting masks on test data...')
     # print('-'*30)
-    # imgs_mask_test = model.predict(imgs_test, verbose=1)
-    # np.save('imgs_mask_test.npy', imgs_mask_test)
-
-    # print('-' * 30)
-    # print('Saving predicted masks to files...')
+    imgs_mask_test = model.predict(imgs_test, verbose=1)
+    np.savez_compressed('/imgs_test_mask', imgs_test_mask=imgs_mask_test)
+    print('Saving predicted masks to files...')
     # print('-' * 30)
     # pred_dir = 'preds'
     # if not os.path.exists(pred_dir):

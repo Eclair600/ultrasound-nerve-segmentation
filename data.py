@@ -49,8 +49,8 @@ def create_train_data(train_ids = [1,2,3,5,8,10,13,19]):
             train_data = image
             train_mask = mask
     print("Final shape {},{}".format(train_data.shape,train_mask.shape))    
-    np.savez_compressed('../imgs_train', imgs=train_data,)
-    np.savez_compressed('../imgs_mask_train', imgs_mask=train_mask)
+    np.savez_compressed('imgs_train', imgs=train_data,)
+    np.savez_compressed('imgs_mask_train', imgs_mask=train_mask)
 
 def load_train_data():
     #path data_train
@@ -61,40 +61,20 @@ def load_train_data():
 
 
 def create_test_data():
-    train_data_path = os.path.join(data_path, 'test')
-    images = os.listdir(train_data_path)
-    total = len(images)
-
-    imgs = np.ndarray((total, image_rows, image_cols), dtype=np.uint8)
-    imgs_id = np.ndarray((total, ), dtype=np.int32)
-
-    i = 0
-    print('-'*30)
-    print('Creating test images...')
-    print('-'*30)
-    for image_name in images:
-        img_id = int(image_name.split('.')[0])
-        img = imread(os.path.join(train_data_path, image_name), as_grey=True)
-
-        img = np.array([img])
-
-        imgs[i] = img
-        imgs_id[i] = img_id
-
-        if i % 100 == 0:
-            print('Done: {0}/{1} images'.format(i, total))
-        i += 1
-    print('Loading done.')
-
-    np.save('imgs_test.npy', imgs)
-    np.save('imgs_id_test.npy', imgs_id)
-    print('Saving to .npy files done.')
-
+    for idx, test_id in tqdm(enumerate(test_ids)):
+        image = read_test_exam(test_id)     
+        image = preprocess(image)
+        print("img {}".format(image.shape))
+        if idx > 0:
+            test_data = np.concatenate((test_data, image),axis=0)
+        else:
+            test_data = image
+    print("Final shape {}".format(test_data.shape))    
+    np.savez_compressed('imgs_test', imgs=test_data)
 
 def load_test_data():
-    imgs_test = np.load('imgs_test.npy')
-    imgs_id = np.load('imgs_id_test.npy')
-    return imgs_test, imgs_id
+    imgs_test = np.load('imgs_test.npz')['imgs']
+    return imgs_test
 
 if __name__ == '__main__':
     create_train_data()
