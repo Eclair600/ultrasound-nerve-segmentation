@@ -103,7 +103,8 @@ def train_and_predict():
     std = np.std(imgs_train)  # std for data normalization
     imgs_train -= mean
     imgs_train /= std
-
+    
+    np.save_npz('scaler',mean=mean,std=std)
     #We have 4 classes, it must be have 4 levels
     #imgs_mask_train = imgs_mask_train.astype('float32')
     #imgs_mask_train /= 255.  # scale masks to [0, 1]
@@ -112,29 +113,29 @@ def train_and_predict():
     print('Creating and compiling model...')
     print('-'*30)
     model = get_unet()
-    model_checkpoint = ModelCheckpoint('weights.h5', monitor='val_loss', save_best_only=True)
+    #model_checkpoint = ModelCheckpoint('weights.h5', monitor='val_loss', save_best_only=True)
 
     print('-'*30)
     print('Fitting model...')
     print('-'*30)
-    model.fit(imgs_train, imgs_mask_train, batch_size=32, epochs=50, verbose=1, shuffle=True,
-              validation_split=0.2,
-              callbacks=[model_checkpoint])
+    model.fit(imgs_train, imgs_mask_train, batch_size=10, epochs=10, verbose=1, shuffle=True,
+              validation_split=0.2)
+    model.save_weights(filepath='final_weights.h5')
 
     
 def test():
     print('-'*30)
     print('Loading and preprocessing test data...')
     print('-'*30)
+   # imgs_train, imgs_mask_train = load_train_data()
 
-    imgs_train, imgs_mask_train = load_train_data()
-
-    imgs_train = imgs_train.astype('float32')
-    mean = np.mean(imgs_train)  # mean for data centering
-    std = np.std(imgs_train)  # std for data normalization
+   # imgs_train = imgs_train.astype('float32')
+   # mean = np.mean(imgs_train)  # mean for data centering
+    #std = np.std(imgs_train)  # std for data normalization
 
     imgs_test = load_test_data()
-
+    mean = np.load('scaler.npz')['mean']
+    std = np.load('scaler.npz')['std']
     imgs_test = imgs_test.astype('float32')
     imgs_test -= mean
     imgs_test /= std
@@ -145,12 +146,12 @@ def test():
     model = get_unet()
     # print('Loading saved weights...')
     # print('-'*30)
-    model.load_weights('weights.h5')
+    model.load_weights('final_weights.h5')
 
     # print('-'*30)
     print('Predicting masks on test data...')
     # print('-'*30)
-    imgs_mask_test = model.predict(imgs_test, verbose=1)
+    imgs_mask_test = model.predict(imgs_test, verbose=2)
     np.savez_compressed('/imgs_test_mask', imgs_test_mask=imgs_mask_test)
     print('Saving predicted masks to files...')
     # print('-' * 30)

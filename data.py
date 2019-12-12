@@ -13,7 +13,7 @@ from tqdm import tqdm
 data_path = 'raw/'
 image_rows = 256
 image_cols = 256
-
+"""
 def read_train_exam(exam_nb):
     image = nibabel.load('../chaos/train/%02d-T2SPIR-src.nii.gz'%(exam_nb))
     mask = nibabel.load('../chaos/train/%02d-T2SPIR-mask.nii.gz'%(exam_nb))
@@ -51,11 +51,11 @@ def create_train_data(train_ids = [1,2,3,5,8,10,13,19]):
     print("Final shape {},{}".format(train_data.shape,train_mask.shape))    
     np.savez_compressed('imgs_train', imgs=train_data,)
     np.savez_compressed('imgs_mask_train', imgs_mask=train_mask)
-
+"""
 def load_train_data():
     #path data_train
-    imgs = np.load('imgs_train.npz')['imgs']
-    imgs_mask = np.load('imgs_mask_train.npz')['imgs_mask']
+    imgs = np.load('./dataset/imgs_train_0.npz')['imgs']
+    imgs_mask = np.load('./dataset/imgs_mask_train_0.npz')['imgs_mask']
 
     return imgs, imgs_mask
 
