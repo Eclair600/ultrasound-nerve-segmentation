@@ -104,7 +104,7 @@ def train_and_predict():
     imgs_train -= mean
     imgs_train /= std
     
-    np.save_npz('scaler',mean=mean,std=std)
+    np.savez_compressed('scaler',mean=mean,std=std)
     #We have 4 classes, it must be have 4 levels
     #imgs_mask_train = imgs_mask_train.astype('float32')
     #imgs_mask_train /= 255.  # scale masks to [0, 1]
@@ -118,7 +118,7 @@ def train_and_predict():
     print('-'*30)
     print('Fitting model...')
     print('-'*30)
-    model.fit(imgs_train, imgs_mask_train, batch_size=10, epochs=10, verbose=1, shuffle=True,
+    model.fit(imgs_train, imgs_mask_train, batch_size=5, epochs=50, verbose=1, shuffle=True,
               validation_split=0.2)
     model.save_weights(filepath='final_weights.h5')
 
