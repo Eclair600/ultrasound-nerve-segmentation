@@ -73,7 +73,7 @@ def create_test_data():
     np.savez_compressed('imgs_test', imgs=test_data)
 
 def load_test_data():
-    imgs_test = np.load('imgs_test.npz')['imgs']
+    imgs_test = np.load('./dataset/imgs_test.npz')['imgs']
     return imgs_test
 
 if __name__ == '__main__':

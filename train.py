@@ -39,7 +39,7 @@ def dice_coef(y_true, y_pred):
     dice_rkidney = dice_coef_(y_true[0,:,:,1], y_pred[0,:,:,1])
     dice_lkidney = dice_coef_(y_true[0,:,:,2], y_pred[0,:,:,2])
     dice_spleen = dice_coef_(y_true[0,:,:,3], y_pred[0,:,:,3])
-    return dice_liver + 100*(dice_rkidney+dice_lkidney+dice_spleen)
+    return dice_liver + 200*(dice_rkidney+dice_lkidney)+50*dice_spleen
     
 
 def dice_coef_loss(y_true, y_pred):  
@@ -152,7 +152,7 @@ def test():
     print('Predicting masks on test data...')
     # print('-'*30)
     imgs_mask_test = model.predict(imgs_test, verbose=2)
-    np.savez_compressed('/imgs_test_mask', imgs_test_mask=imgs_mask_test)
+    np.savez_compressed('mask_predict', mask_predict=imgs_mask_test)
     print('Saving predicted masks to files...')
     # print('-' * 30)
     # pred_dir = 'preds'
